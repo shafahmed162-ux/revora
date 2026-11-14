@@ -1,36 +1,102 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+
+# Revora
+
+**Intelligent Automotive Discovery**
+
+Revora is an AI-powered automotive discovery and recommendation platform designed to help Canadian drivers find vehicles that match their budgets, lifestyles, and preferences.
+
+The project is being developed as both a potential SaaS product and a full-stack software engineering portfolio project.
+
+## Project Status
+
+**In Development — Phase 1: Foundation**
+
+The current application includes an initial responsive landing page and an interactive vehicle search interface.
+
+Vehicle recommendations and AI integration are planned features and are not yet implemented.
+
+## Planned Features
+
+- Natural-language vehicle discovery
+- Personalized recommendations
+- Verified Canadian vehicle specifications
+- Explainable vehicle matching
+- Vehicle comparisons
+- Budget and ownership-cost considerations
+
+## Technology Stack
+
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
+- Git and GitHub
+
+Planned additions include PostgreSQL, Supabase, OpenAI API integration, automated testing, and CI/CD.
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js
+- npm
+
+### Installation
+
+Clone the repository and install dependencies:
+
+```bash
+npm install
+```
+
+Start the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000 in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Development Checks
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Run ESLint:
 
-## Learn More
+```bash
+npm run lint
+```
 
-To learn more about Next.js, take a look at the following resources:
+Run TypeScript validation:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npx tsc --noEmit
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Current Testing Status
 
-## Deploy on Vercel
+- Homepage manually verified in Google Chrome.
+- Search input and placeholder button interaction verified.
+- ESLint passed.
+- TypeScript validation passed.
+- Production dependency audit reported zero vulnerabilities.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The full dependency audit identified eight moderate-severity findings in development tooling, which remain under review.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Roadmap
+
+- [x] Initialize Next.js application
+- [x] Build initial landing page
+- [x] Implement interactive search input
+- [x] Run initial code-quality checks
+- [ ] Build vehicle database
+- [ ] Implement recommendation engine
+- [ ] Integrate AI-powered requirement extraction
+- [ ] Create vehicle comparison interface
+- [ ] Add automated tests
+- [ ] Configure GitHub Actions
+- [ ] Deploy application
+
+## Current Limitations
+
+Revora is in early development. The vehicle search button currently displays a placeholder message rather than generating recommendations.
+
+Vehicle information, live dealership listings, and personalized ownership-cost calculations are not yet available.
