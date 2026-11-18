@@ -6,6 +6,8 @@ import { demoVehicles } from "../data/demo-vehicles";
 import { recommendVehicles } from "../lib/vehicle-recommend";
 import type { BodyStyle, Drivetrain } from "../types/vehicle";
 import type { VehicleScore } from "../lib/vehicle-score";
+import { parseVehicleQuery } from "../lib/vehicle-query-parser";
+
 
 export default function Home() {
   const [search, setSearch] = useState("");
@@ -16,6 +18,7 @@ export default function Home() {
   const [ambientLighting, setAmbientLighting] = useState(false);
   const [results, setResults] = useState<VehicleScore[] | null>(null);
   const [error, setError] = useState("");
+  const [unsupportedFeatures, setUnsupportedFeatures] = useState<string[]>([]);
   const resultsRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -27,36 +30,68 @@ export default function Home() {
     }
   }, [results]);
 
+
   function handleSearch(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
 
-    const budget = maxBudget.trim() === "" ? undefined : Number(maxBudget);
-    const seats = minSeats.trim() === "" ? undefined : Number(minSeats);
+    const budget =
+      maxBudget.trim() === "" ? undefined : Number(maxBudget);
+
+    const seats =
+      minSeats.trim() === "" ? undefined : Number(minSeats);
 
     if (
-      (budget !== undefined && (!Number.isFinite(budget) || budget < 0)) ||
-      (seats !== undefined && (!Number.isInteger(seats) || seats < 1))
+      (budget !== undefined &&
+        (!Number.isFinite(budget) || budget < 0)) ||
+      (seats !== undefined &&
+        (!Number.isInteger(seats) || seats < 1))
     ) {
       setResults(null);
-      setError("Please enter a valid budget and minimum seating requirement.");
+      setError(
+        "Please enter a valid budget and minimum seating requirement."
+      );
       return;
     }
 
+    const parsed = parseVehicleQuery(search);
+
+
+    setUnsupportedFeatures(parsed.unsupportedFeatures);
+
+    if (parsed.unsupportedFeatures.length > 0) {
+      setResults(null);
+      return;
+    }
+
+
     const recommendations = recommendVehicles(demoVehicles, {
       requirements: {
-        ...(bodyStyle && { bodyStyle: bodyStyle as BodyStyle }),
-        ...(drivetrain && { drivetrain: drivetrain as Drivetrain }),
-        ...(budget !== undefined && { maxPriceCAD: budget }),
-        ...(seats !== undefined && { minSeats: seats }),
+        ...parsed.requirements,
+        ...(bodyStyle && {
+          bodyStyle: bodyStyle as BodyStyle,
+        }),
+        ...(drivetrain && {
+          drivetrain: drivetrain as Drivetrain,
+        }),
+        ...(budget !== undefined && {
+          maxPriceCAD: budget,
+        }),
+        ...(seats !== undefined && {
+          minSeats: seats,
+        }),
       },
       preferences: {
-        ambientLighting,
+        ...parsed.preferences,
+        ambientLighting:
+          ambientLighting ||
+          parsed.preferences.ambientLighting === true,
       },
     });
 
     setResults(recommendations);
   }
+
 
   return (
     <main className="min-h-screen bg-zinc-950 text-white">
@@ -105,10 +140,13 @@ export default function Home() {
             className="w-full resize-none rounded-2xl border border-white/10 bg-zinc-900 p-5 text-white outline-none placeholder:text-zinc-500 focus:border-blue-500"
           />
 
+
           <p className="mt-2 text-left text-xs text-zinc-500">
-            Natural-language search is coming soon. Use the filters below
-            to find matching demonstration vehicles.
+            Describe your ideal vehicle or use the filters below.
+            Revora currently understands basic requirements such as
+            budget, body style, drivetrain, seating, and ambient lighting.
           </p>
+
 
           <div className="mt-8 grid gap-4 text-left md:grid-cols-2">
             <label className="flex flex-col gap-2 text-sm text-zinc-300">
@@ -189,6 +227,34 @@ export default function Home() {
               {error}
             </p>
           )}
+
+
+          {unsupportedFeatures.length > 0 && (
+            <div
+              role="alert"
+              className="mt-5 rounded-xl border border-amber-500/30 bg-amber-500/10 p-5 text-left"
+            >
+              <h3 className="font-semibold text-amber-300">
+                Some requested features aren't supported yet
+              </h3>
+
+              <p className="mt-2 text-sm text-zinc-300">
+                Revora currently cannot verify these features:
+              </p>
+
+              <ul className="mt-3 list-inside list-disc text-sm text-amber-200">
+                {unsupportedFeatures.map((feature) => (
+                  <li key={feature}>{feature}</li>
+                ))}
+              </ul>
+
+              <p className="mt-3 text-sm text-zinc-400">
+                Please remove these requirements and search again.
+                We're expanding vehicle feature support.
+              </p>
+            </div>
+          )}
+
 
           <button
             type="submit"
