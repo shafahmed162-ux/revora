@@ -112,4 +112,66 @@ describe("Natural-language vehicle query parser", () => {
   });
 
 
+  it("does not interpret a rejected sedan as a requirement", () => {
+    const result = parseVehicleQuery(
+      "I want an AWD SUV, not a sedan"
+    );
+
+    expect(result.requirements.bodyStyle).toBe("suv");
+  });
+
+  it("does not require a rejected body style", () => {
+    const result = parseVehicleQuery(
+      "I don't want a sedan"
+    );
+
+    expect(result.requirements.bodyStyle).toBeUndefined();
+  });
+
+  it("does not prefer unwanted ambient lighting", () => {
+    const result = parseVehicleQuery(
+      "I don't want ambient lighting"
+    );
+
+    expect(result.preferences.ambientLighting).not.toBe(true);
+  });
+
+
+  it("parses a single excluded body style", () => {
+    const result = parseVehicleQuery(
+      "I want a car under $30k, no sedans"
+    );
+
+    expect(result.requirements.excludedBodyStyles).toEqual([
+      "sedan",
+    ]);
+    expect(result.requirements.maxPriceCAD).toBe(30000);
+  });
+
+  it("parses multiple excluded body styles", () => {
+    const result = parseVehicleQuery(
+      "I want a car under $35k, no sedans or coupes"
+    );
+
+    expect(result.requirements.excludedBodyStyles).toEqual([
+      "sedan",
+      "coupe",
+    ]);
+  });
+
+  it("combines a required SUV with an excluded sedan", () => {
+    const result = parseVehicleQuery(
+      "I want an AWD SUV under $35k, not a sedan"
+    );
+
+    expect(result.requirements.bodyStyle).toBe("suv");
+    expect(result.requirements.drivetrain).toBe("AWD");
+    expect(result.requirements.maxPriceCAD).toBe(35000);
+    expect(result.requirements.excludedBodyStyles).toEqual([
+      "sedan",
+    ]);
+  });
+
+
+
 });

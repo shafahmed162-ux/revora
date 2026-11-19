@@ -65,6 +65,21 @@ export default function Home() {
     }
 
 
+    if (
+      bodyStyle &&
+      parsed.requirements.excludedBodyStyles?.includes(
+        bodyStyle as BodyStyle
+      )
+    ) {
+      setResults(null);
+      setError(
+        `Your search excludes ${bodyStyle}, but you selected it in the Body Style filter. Please change one of these requirements.`
+      );
+      return;
+    }
+
+
+
     const recommendations = recommendVehicles(demoVehicles, {
       requirements: {
         ...parsed.requirements,
@@ -97,7 +112,7 @@ export default function Home() {
     <main className="min-h-screen bg-zinc-950 text-white">
       <nav className="flex items-center justify-between border-b border-white/10 px-8 py-6">
         <h1 className="text-2xl font-bold tracking-tight">
-          REVORA
+          REVAURA
         </h1>
 
         <span className="text-sm text-zinc-400">
@@ -235,7 +250,7 @@ export default function Home() {
               className="mt-5 rounded-xl border border-amber-500/30 bg-amber-500/10 p-5 text-left"
             >
               <h3 className="font-semibold text-amber-300">
-                Some requested features aren't supported yet
+                Some requested features aren&apos;t supported yet
               </h3>
 
               <p className="mt-2 text-sm text-zinc-300">
@@ -250,7 +265,7 @@ export default function Home() {
 
               <p className="mt-3 text-sm text-zinc-400">
                 Please remove these requirements and search again.
-                We're expanding vehicle feature support.
+                We&apos;re expanding vehicle feature support.
               </p>
             </div>
           )}

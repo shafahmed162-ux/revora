@@ -3,6 +3,7 @@ import type { BodyStyle, Drivetrain, Vehicle } from "../types/vehicle";
 
 export interface VehicleFilters {
   bodyStyle?: BodyStyle;
+  excludedBodyStyles?: BodyStyle[];
   drivetrain?: Drivetrain;
   minSeats?: number;
   maxPriceCAD?: number;
@@ -13,7 +14,6 @@ export function filterVehicles(
   filters: VehicleFilters
 ): Vehicle[] {
   return vehicles.filter((vehicle) => {
-    // A requested body style must match exactly.
     if (
       filters.bodyStyle !== undefined &&
       vehicle.bodyStyle !== filters.bodyStyle
@@ -21,7 +21,14 @@ export function filterVehicles(
       return false;
     }
 
-    // A requested drivetrain must match exactly.
+    if (
+      filters.excludedBodyStyles !== undefined &&
+      vehicle.bodyStyle !== null &&
+      filters.excludedBodyStyles.includes(vehicle.bodyStyle)
+    ) {
+      return false;
+    }
+
     if (
       filters.drivetrain !== undefined &&
       vehicle.drivetrain !== filters.drivetrain
@@ -29,7 +36,6 @@ export function filterVehicles(
       return false;
     }
 
-    // Unknown seating capacity cannot satisfy a minimum.
     if (filters.minSeats !== undefined) {
       if (
         vehicle.seats === null ||

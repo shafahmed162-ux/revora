@@ -1,4 +1,5 @@
 
+import type { BodyStyle } from "../types/vehicle";
 import type { VehicleFilters } from "./vehicle-filter";
 import type { VehiclePreferences } from "./vehicle-score";
 
@@ -28,8 +29,54 @@ export function parseVehicleQuery(
     "convertible",
   ] as const;
 
+  const stylePattern =
+    /\b(sedans?|suvs?|coupes?|hatchbacks?|wagons?|trucks?|minivans?|convertibles?)\b/gi;
+
+  const negativeBodyStylePattern =
+    /\b(?:don't want|do not want|not|no|without|avoid|excluding)\s+(?:(?:an?|any)\s+)?(?:sedans?|suvs?|coupes?|hatchbacks?|wagons?|trucks?|minivans?|convertibles?)(?:\s*(?:,|or|and)\s*(?:(?:an?|any)\s+)?(?:sedans?|suvs?|coupes?|hatchbacks?|wagons?|trucks?|minivans?|convertibles?))*/gi;
+
+  const excludedStyles = new Set<BodyStyle>();
+
+  const negativeMatches = text.match(
+    negativeBodyStylePattern
+  ) ?? [];
+
+  for (const phrase of negativeMatches) {
+    const styles = phrase.match(stylePattern) ?? [];
+
+    for (const style of styles) {
+      const normalized = style.endsWith("s")
+        ? style.slice(0, -1)
+        : style;
+
+      if (
+        bodyStyles.includes(
+          normalized as (typeof bodyStyles)[number]
+        )
+      ) {
+        excludedStyles.add(normalized as BodyStyle);
+      }
+    }
+  }
+
+  if (excludedStyles.size > 0) {
+    requirements.excludedBodyStyles = [
+      ...excludedStyles,
+    ];
+  }
+
+  const cleanedText = text.replace(
+    negativeBodyStylePattern,
+    " "
+  );
+
   for (const style of bodyStyles) {
-    if (new RegExp(`\\b${style}\\b`, "i").test(text)) {
+    const pattern = new RegExp(
+      String.raw`\b${style}\b`,
+      "i"
+    );
+
+    if (pattern.test(cleanedText)) {
       requirements.bodyStyle = style;
       break;
     }
@@ -54,10 +101,16 @@ export function parseVehicleQuery(
       budgetMatch[1].replaceAll(",", "")
     );
 
-    const multiplier = budgetMatch[2] ? 1000 : 1;
+    const multiplier = budgetMatch[2]
+      ? 1000
+      : 1;
+
     const budget = amount * multiplier;
 
-    if (Number.isFinite(budget) && budget > 0) {
+    if (
+      Number.isFinite(budget) &&
+      budget > 0
+    ) {
       requirements.maxPriceCAD = budget;
     }
   }
@@ -67,10 +120,21 @@ export function parseVehicleQuery(
   );
 
   if (seatsMatch) {
-    requirements.minSeats = Number(seatsMatch[1]);
+    requirements.minSeats = Number(
+      seatsMatch[1]
+    );
   }
 
-  if (/\bambient lighting\b/i.test(text)) {
+  const negativeAmbientLighting =
+    /\b(?:don't want|do not want|not|no|without|avoid)\s+(?:any\s+)?ambient lighting\b/i.test(
+      text
+    );
+
+  if (negativeAmbientLighting) {
+    unsupportedFeatures.push(
+      "Excluding ambient lighting"
+    );
+  } else if (/\bambient lighting\b/i.test(text)) {
     preferences.ambientLighting = true;
   }
 
